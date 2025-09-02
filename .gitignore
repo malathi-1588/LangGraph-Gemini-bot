@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+env/
+
+
+# API keys and secrets
+backend/.env.local
+backend/config/secrets.json
+
+# IDE files
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+data/
+__pycache__
+
+testbot.py
