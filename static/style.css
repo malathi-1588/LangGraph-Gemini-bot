@@ -9,8 +9,8 @@ body {
 }
 
 .chat-container {
-  width: 600px;           /* wider */
-  height: 80vh;           /* takes most of screen height */
+  width: 600px;           
+  height: 80vh;           
   max-height: 90vh;
   background: white;
   border-radius: 10px;
@@ -32,9 +32,9 @@ body {
 .chat-box {
   flex: 1;
   padding: 15px;
-  overflow-y: auto;       /* scrollable */
+  overflow-y: auto;       
   border-bottom: 1px solid #ddd;
-  scroll-behavior: smooth; /* smooth auto-scroll */
+  scroll-behavior: smooth; 
 }
 
 .chat-input {
@@ -80,7 +80,7 @@ button:hover {
 }
 
 .bubble {
-  max-width: 75%;          /* keeps lines readable */
+  max-width: 75%;          
   padding: 10px 14px;
   border-radius: 15px;
   background: #e4e6eb;
