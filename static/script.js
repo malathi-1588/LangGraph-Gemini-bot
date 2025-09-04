@@ -1,31 +1,66 @@
-let chatHistory = [];
+const chatBox = document.getElementById("chat-box");
+const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const clearBtn = document.getElementById("clear-btn");
 
 async function sendMessage() {
-    const userInput = document.getElementById("user-input").value;
-    if (!userInput.trim()) return;
+  const message = userInput.value.trim();
+  if (!message) return;
 
-    const chatBox = document.getElementById("chat-box");
-    chatBox.innerHTML += `<div><strong>You:</strong> ${userInput}</div>`;
-    document.getElementById("user-input").value = "";
+  // Add user bubble
+  addMessage("You", message, "user");
+  userInput.value = "";
 
-    try {
-        const response = await fetch("http://127.0.0.1:8000/chat/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: userInput, history: chatHistory })
-        });
-        const data = await response.json();
-        // The backend returns { response: ..., history: [...] }
-        chatBox.innerHTML += `<div><strong>Bot:</strong> ${data.response}</div>`;
-        // Update chatHistory with the new history from backend (if present)
-        if (data.history) {
-            chatHistory = data.history;
-        } else {
-            // Fallback: push the latest turn
-            chatHistory.push([userInput, data.response]);
-        }
-    } catch (error) {
-        chatBox.innerHTML += `<div><strong>Error:</strong> Failed to fetch response</div>`;
-    }
-    chatBox.scrollTop = chatBox.scrollHeight;
+  // Add loading indicator
+  const loadingId = addMessage("Bot", "⏳ Thinking...", "bot");
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/chat/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+
+    // Remove loading
+    document.getElementById(loadingId).remove();
+
+    // Add bot reply
+    addMessage("Bot", `${data.response}`, "bot", data.route);
+
+  } catch (error) {
+    document.getElementById(loadingId).remove();
+    addMessage("Bot", "❌ Failed to fetch response", "bot");
+  }
 }
+
+function addMessage(sender, text, type, route = null) {
+  const msgId = "msg-" + Date.now();
+  const div = document.createElement("div");
+  div.className = `message ${type}`;
+  div.id = msgId;
+
+  div.innerHTML = `
+    <div class="bubble">
+      <strong>${sender}:</strong> ${text}
+      ${route ? `<span class="route">(${route})</span>` : ""}
+    </div>
+  `;
+
+  chatBox.appendChild(div);
+  chatBox.scrollTo({
+  top: chatBox.scrollHeight,
+  behavior: "smooth"
+});
+  return msgId;
+}
+
+// Event listeners
+sendBtn.addEventListener("click", sendMessage);
+userInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+clearBtn.addEventListener("click", () => {
+  chatBox.innerHTML = "";
+});
