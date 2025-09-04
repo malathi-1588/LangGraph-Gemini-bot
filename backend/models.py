@@ -1,5 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
 
-# Define request model
 class ChatRequest(BaseModel):
     message: str
+    session_id: Optional[str] = "default"  # to separate users/conversations

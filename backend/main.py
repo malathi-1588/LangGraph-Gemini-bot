@@ -1,31 +1,28 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from models import ChatRequest
-from llm import initialize_chat_engine
-import os
-
-# Set Gemini API Key
 from dotenv import load_dotenv
-load_dotenv()
-#os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+from models import ChatRequest
+from llm_graph import LLMGraphApp
 
-app = FastAPI()
+load_dotenv()
+
+app = FastAPI(title="Hybrid RAG + Web Chatbot")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # lock down in prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize chat engine
-chat_engine = initialize_chat_engine()
+# Initialize the graph app once on startup
+graph_app = LLMGraphApp(data_dir="data", index_dir="vectorstore", model_name="gemini-2.5-pro")
 
 @app.post("/chat/")
 async def chat(request: ChatRequest):
     try:
-        response = chat_engine.invoke({"question": request.message})
-        return {"response": response["answer"]}
+        result = graph_app.invoke(question=request.message, session_id=request.session_id or "default")
+        return {"response": result["answer"], "route": result["route"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
